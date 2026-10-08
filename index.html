@@ -1,0 +1,935 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Fleet Camera Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --paper:#EEF1F3;
+    --paper-raised:#FFFFFF;
+    --ink:#1C2128;
+    --ink-soft:#4B5A68;
+    --steel:#3D4C5C;
+    --line:rgba(61,76,92,0.18);
+    --line-strong:rgba(61,76,92,0.32);
+    --accent:#C8791F;
+    --accent-soft:#F3E3C8;
+    --accent-ink:#7A4A12;
+    --danger:#B3402F;
+    --good:#3F7A57;
+    --shadow: 0 1px 2px rgba(28,33,40,0.04), 0 8px 24px rgba(28,33,40,0.06);
+    --font-display:'Big Shoulders Display','Arial Narrow',sans-serif;
+    --font-body:'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14181C;
+      --paper-raised:#1B2127;
+      --ink:#E7EBEE;
+      --ink-soft:#9FB0BC;
+      --steel:#8FA3B3;
+      --line:rgba(159,176,188,0.18);
+      --line-strong:rgba(159,176,188,0.32);
+      --accent:#F0B35B;
+      --accent-soft:#3A2C14;
+      --accent-ink:#F7CA8C;
+      --danger:#E07A63;
+      --good:#6FBE8F;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181C;
+    --paper-raised:#1B2127;
+    --ink:#E7EBEE;
+    --ink-soft:#9FB0BC;
+    --steel:#8FA3B3;
+    --line:rgba(159,176,188,0.18);
+    --line-strong:rgba(159,176,188,0.32);
+    --accent:#F0B35B;
+    --accent-soft:#3A2C14;
+    --accent-ink:#F7CA8C;
+    --danger:#E07A63;
+    --good:#6FBE8F;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2{font-family:var(--font-display);text-wrap:balance;letter-spacing:0.01em;}
+  a{color:inherit;}
+  ::selection{background:var(--accent-soft);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--steel);
+  }
+
+  /* ---------- shell layout ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:230px minmax(0,760px);
+    justify-content:center;
+    gap:48px;
+    max-width:1100px;
+    margin:0 auto;
+    padding:40px 24px 140px;
+    align-items:start;
+  }
+  @media (max-width:880px){
+    .shell{grid-template-columns:minmax(0,1fr);padding:0 0 130px;gap:0;}
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    grid-column:1 / -1;
+    max-width:760px;
+    margin:0 auto 8px;
+    padding:0 24px;
+  }
+  @media (max-width:880px){ .masthead{padding:28px 20px 16px;} }
+  .masthead .beacon-row{
+    display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  }
+  .beacon{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+    animation:pulse 1.8s ease-in-out infinite;
+    flex:none;
+  }
+  @media (prefers-reduced-motion: reduce){ .beacon{animation:none;} }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:0.45;transform:scale(0.78);}
+  }
+  .masthead h1{
+    font-size:clamp(34px,5vw,46px);
+    font-weight:800;
+    margin:4px 0 10px;
+    line-height:0.98;
+  }
+  .masthead p.lede{
+    max-width:62ch;
+    color:var(--ink-soft);
+    font-size:16px;
+    margin:0 0 18px;
+  }
+  .status-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    font-weight:600;
+    color:var(--steel);
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 12px;
+    font-variant-numeric:tabular-nums;
+  }
+  .status-pill b{color:var(--ink);}
+
+  /* ---------- side nav ---------- */
+  .ticket-nav{
+    position:sticky;top:28px;
+    display:flex;flex-direction:column;
+    gap:2px;
+  }
+  .ticket-nav a{
+    display:flex;align-items:baseline;gap:10px;
+    padding:7px 10px;
+    border-radius:7px;
+    text-decoration:none;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    border-left:2px solid transparent;
+  }
+  .ticket-nav a .n{font-family:var(--font-mono);font-size:11px;color:var(--steel);font-variant-numeric:tabular-nums;}
+  .ticket-nav a.active{
+    color:var(--ink);
+    background:var(--paper-raised);
+    border-left-color:var(--accent);
+    box-shadow:var(--shadow);
+  }
+  .ticket-nav a.active .n{color:var(--accent-ink);}
+  .nav-progress{
+    margin-top:14px;padding-top:14px;border-top:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11px;color:var(--steel);
+  }
+  .nav-progress .bar{
+    height:4px;border-radius:2px;background:var(--line);margin-top:8px;overflow:hidden;
+  }
+  .nav-progress .bar i{display:block;height:100%;background:var(--accent);width:0%;transition:width .25s ease;}
+
+  @media (max-width:880px){
+    .ticket-nav{
+      position:sticky;top:0;z-index:20;
+      flex-direction:row;
+      gap:4px;
+      overflow-x:auto;
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
+      padding:10px 14px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .ticket-nav a{flex:none;white-space:nowrap;border-left:none;border-bottom:2px solid transparent;}
+    .ticket-nav a.active{border-left:none;border-bottom-color:var(--accent);box-shadow:none;}
+    .nav-progress{display:none;}
+  }
+
+  /* ---------- tickets (sections) ---------- */
+  .ticket{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:28px 30px 30px;
+    margin-bottom:22px;
+    scroll-margin-top:90px;
+  }
+  @media (max-width:880px){
+    .ticket{border-radius:0;border-left:none;border-right:none;margin-bottom:0;border-top:none;padding:26px 20px;}
+  }
+  .ticket-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:6px;}
+  .ticket-num{
+    font-family:var(--font-mono);font-weight:600;font-size:13px;
+    color:var(--accent-ink);background:var(--accent-soft);
+    border-radius:6px;padding:3px 7px;line-height:1.3;flex:none;margin-top:3px;
+  }
+  .ticket h2{font-size:23px;font-weight:700;margin:0;}
+  .ticket-sub{color:var(--ink-soft);font-size:14.5px;margin:8px 0 22px;max-width:58ch;}
+
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .label{
+    display:block;font-weight:600;font-size:14.5px;margin-bottom:7px;
+  }
+  .label .req{color:var(--danger);margin-left:3px;}
+  .label .opt{color:var(--ink-soft);font-weight:400;font-size:13px;}
+  .hint{color:var(--ink-soft);font-size:13px;margin-top:6px;}
+
+  input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],
+  textarea,select{
+    width:100%;
+    font-family:var(--font-body);
+    font-size:15px;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  textarea{resize:vertical;min-height:72px;line-height:1.5;}
+  input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--steel) 50%),linear-gradient(135deg,var(--steel) 50%,transparent 50%);background-position:calc(100% - 20px) center,calc(100% - 15px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px;}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){ .row2{grid-template-columns:1fr;} }
+
+  .choice-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    display:flex;align-items:center;gap:7px;
+    border:1px solid var(--line-strong);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:14px;
+    cursor:pointer;
+    background:var(--paper);
+    user-select:none;
+  }
+  .chip input{accent-color:var(--accent);margin:0;width:15px;height:15px;flex:none;}
+  .chip:has(input:checked){
+    background:var(--accent-soft);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+    font-weight:600;
+  }
+
+  .stack-radio{display:flex;flex-direction:column;gap:8px;}
+  .stack-radio .chip{width:100%;}
+
+  /* ---------- action bar ---------- */
+  .action-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:var(--paper-raised);
+    border-top:1px solid var(--line);
+    box-shadow:0 -8px 24px rgba(28,33,40,0.08);
+    padding:12px 24px;
+  }
+  .action-bar-inner{
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .action-buttons{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{
+    font-family:var(--font-body);
+    font-weight:600;font-size:14px;
+    border-radius:8px;
+    padding:10px 16px;
+    border:1px solid var(--line-strong);
+    background:var(--paper);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#231604;}
+  .btn.ghost{background:transparent;}
+  .btn:hover{border-color:var(--accent);}
+  .saved-note{
+    font-family:var(--font-mono);font-size:12px;color:var(--steel);
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  @media (max-width:640px){
+    .action-bar{padding:10px 14px;}
+    .action-bar-inner{justify-content:center;}
+    .saved-note{width:100%;text-align:center;order:3;}
+  }
+
+  .footnote{
+    grid-column:1/-1;max-width:760px;margin:6px auto 0;padding:0 24px 10px;
+    color:var(--ink-soft);font-size:13px;
+  }
+  @media (max-width:880px){ .footnote{padding:14px 20px;} }
+
+  @media print{
+    .ticket-nav,.action-bar{display:none !important;}
+    body{background:#fff;color:#111;}
+    .ticket{box-shadow:none;border:1px solid #ccc;break-inside:avoid;}
+    .shell{grid-template-columns:1fr;padding:0;}
+  }
+</style>
+
+<div class="masthead">
+  <div class="beacon-row">
+    <span class="beacon" aria-hidden="true"></span>
+    <span class="eyebrow">Fleet camera install &middot; bid intake</span>
+  </div>
+  <h1>Camera Install Intake</h1>
+  <p class="lede">Fill this out once for the whole fleet and we can scope wiring, hardware, and labor accurately — instead of guessing and padding the bid. Takes about 10&nbsp;minutes for someone who knows the trucks.</p>
+  <span class="status-pill" id="statusPill">Progress: <b id="pillPct">0%</b> &nbsp;·&nbsp; Required fields: <b id="pillReq">0/4</b></span>
+</div>
+
+<form class="shell" id="intakeForm" autocomplete="off">
+  <nav class="ticket-nav" id="ticketNav" aria-label="Form sections">
+    <a href="#s1" data-target="s1"><span class="n">01</span>Fleet snapshot</a>
+    <a href="#s2" data-target="s2"><span class="n">02</span>Vehicles &amp; location</a>
+    <a href="#s3" data-target="s3"><span class="n">03</span>Camera coverage</a>
+    <a href="#s4" data-target="s4"><span class="n">04</span>Storage &amp; feed</a>
+    <a href="#s5" data-target="s5"><span class="n">05</span>Bodies &amp; mounting</a>
+    <a href="#s6" data-target="s6"><span class="n">06</span>Power &amp; recording</a>
+    <a href="#s7" data-target="s7"><span class="n">07</span>Telematics &amp; safety</a>
+    <a href="#s8" data-target="s8"><span class="n">08</span>Hardware &amp; testing</a>
+    <a href="#s9" data-target="s9"><span class="n">09</span>Budget &amp; compliance</a>
+    <div class="nav-progress">
+      Form completion
+      <div class="bar"><i id="navBar"></i></div>
+    </div>
+  </nav>
+
+  <div class="tickets">
+
+    <section class="ticket" id="s1">
+      <div class="ticket-head"><span class="ticket-num">01</span><h2>Fleet snapshot</h2></div>
+      <p class="ticket-sub">Who we're talking to, and the size of the job.</p>
+
+      <div class="row2">
+        <div class="field" data-label="Your name">
+          <label class="label" for="reqName">Your name <span class="req">*</span></label>
+          <input type="text" id="reqName" placeholder="Jane Hooley">
+        </div>
+        <div class="field" data-label="Role / title">
+          <label class="label" for="role">Role / title</label>
+          <input type="text" id="role" placeholder="Fleet manager, owner, dispatch...">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Company name">
+          <label class="label" for="reqCompany">Company name <span class="req">*</span></label>
+          <input type="text" id="reqCompany" placeholder="Hooley's Towing &amp; Recovery">
+        </div>
+        <div class="field" data-label="Phone">
+          <label class="label" for="phone">Best phone number</label>
+          <input type="tel" id="phone" placeholder="(555) 555-0135">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Email">
+          <label class="label" for="reqEmail">Email <span class="req">*</span></label>
+          <input type="email" id="reqEmail" placeholder="you@yourcompany.com">
+        </div>
+        <div class="field" data-label="Date completed">
+          <label class="label" for="formDate">Date</label>
+          <input type="date" id="formDate">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Total vehicles to equip">
+          <label class="label" for="reqTotalVehicles">Total vehicles to equip <span class="req">*</span></label>
+          <input type="number" id="reqTotalVehicles" min="1" placeholder="32">
+        </div>
+        <div class="field" data-label="Fleet growth expected">
+          <label class="label" for="growth">Fleet growth in the next 12 months</label>
+          <input type="text" id="growth" placeholder="e.g., adding 4 trucks by spring">
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket" id="s2">
+      <div class="ticket-head"><span class="ticket-num">02</span><h2>Vehicles &amp; location</h2></div>
+      <p class="ticket-sub">Cab styles and body types change the wiring run on every truck — and where the trucks sit decides how many we can knock out per day.</p>
+
+      <div class="field" data-label="Vehicle types &amp; counts">
+        <label class="label" for="vehTypes">Vehicle types &amp; counts</label>
+        <textarea id="vehTypes" placeholder="e.g., 14 wheel-lift, 10 flatbed rollback, 6 integrated/boom wreckers, 2 light-duty"></textarea>
+      </div>
+      <div class="field" data-label="Makes, models, years">
+        <label class="label" for="vehModels">Makes, models, year range</label>
+        <textarea id="vehModels" placeholder="e.g., mostly 2016-2023 Ford F-550/650, a few older Internationals"></textarea>
+      </div>
+      <div class="field" data-label="Single or multiple locations">
+        <span class="label">Are the trucks all at one yard?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="siteCount" id="siteOne" value="One location"><span>One location</span></label>
+          <label class="chip"><input type="radio" name="siteCount" id="siteMulti" value="Multiple locations"><span>Multiple locations</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="Locations, if multiple">
+        <label class="label" for="siteList">Locations / shifts, if split up</label>
+        <textarea id="siteList" placeholder="List yards, or note if trucks run different shifts"></textarea>
+      </div>
+      <div class="field" data-label="Vehicle availability for install">
+        <span class="label">How can we get access to the trucks?</span>
+        <div class="stack-radio">
+          <label class="chip"><input type="radio" name="availability" id="availDaytime" value="Bring 2-3 at a time during business hours"><span>Bring 2–3 at a time during business hours</span></label>
+          <label class="chip"><input type="radio" name="availability" id="availAfterhours" value="Need after-hours or weekend install windows"><span>Need after-hours or weekend windows</span></label>
+          <label class="chip"><input type="radio" name="availability" id="availMix" value="Mix of both"><span>Mix of both</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="Target completion date">
+        <label class="label" for="targetDate">Target date to have the whole fleet done</label>
+        <input type="text" id="targetDate" placeholder="e.g., before winter / by March 1">
+      </div>
+    </section>
+
+    <section class="ticket" id="s3">
+      <div class="ticket-head"><span class="ticket-num">03</span><h2>Camera coverage</h2></div>
+      <p class="ticket-sub">What each truck should actually be able to see.</p>
+
+      <div class="field" data-label="Coverage desired">
+        <span class="label">Coverage desired <span class="opt">(choose all that apply)</span></span>
+        <div class="choice-grid">
+          <label class="chip"><input type="checkbox" id="covFront" value="Front road-facing"><span>Front road-facing</span></label>
+          <label class="chip"><input type="checkbox" id="covRear" value="Rear-facing"><span>Rear-facing</span></label>
+          <label class="chip"><input type="checkbox" id="covDriver" value="Driver-facing (in-cab)"><span>Driver-facing (in-cab)</span></label>
+          <label class="chip"><input type="checkbox" id="covCurb" value="Curb-side"><span>Curb-side</span></label>
+          <label class="chip"><input type="checkbox" id="covStreet" value="Street-side"><span>Street-side</span></label>
+          <label class="chip"><input type="checkbox" id="cov360" value="360deg surround"><span>360&deg; surround</span></label>
+          <label class="chip"><input type="checkbox" id="covBed" value="Cargo bed / flatbed deck"><span>Flatbed deck / cargo bed</span></label>
+          <label class="chip"><input type="checkbox" id="covHitch" value="Hitch &amp; trailer"><span>Hitch &amp; trailer</span></label>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Channels per vehicle">
+          <label class="label" for="channels">Channels per vehicle</label>
+          <select id="channels">
+            <option value="">Select one</option>
+            <option>1 channel</option>
+            <option>2 channels</option>
+            <option>3 channels</option>
+            <option>4 channels</option>
+            <option>4+ channels</option>
+            <option>Recommend for us</option>
+          </select>
+        </div>
+        <div class="field" data-label="Resolution preference">
+          <label class="label" for="resolution">Resolution preference</label>
+          <select id="resolution">
+            <option value="">Select one</option>
+            <option>1080p</option>
+            <option>1440p / 2K</option>
+            <option>4K</option>
+            <option>No preference — recommend</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" data-label="Night vision needed">
+        <span class="label">Night vision / low-light performance required?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="nightVision" id="nvYes" value="Yes"><span>Yes</span></label>
+          <label class="chip"><input type="radio" name="nightVision" id="nvNo" value="No"><span>No</span></label>
+          <label class="chip"><input type="radio" name="nightVision" id="nvUnsure" value="Unsure"><span>Unsure</span></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket" id="s4">
+      <div class="ticket-head"><span class="ticket-num">04</span><h2>Storage &amp; feed</h2></div>
+      <p class="ticket-sub">Where the footage lives, and who gets to watch it happen live.</p>
+
+      <div class="field" data-label="Storage type">
+        <span class="label">Storage <span class="opt">(choose all that apply)</span></span>
+        <div class="choice-grid">
+          <label class="chip"><input type="checkbox" id="storeLocal" value="Local SD/HDD onboard"><span>Local SD / HDD onboard</span></label>
+          <label class="chip"><input type="checkbox" id="storeCloud" value="Cloud backup"><span>Cloud backup</span></label>
+          <label class="chip"><input type="checkbox" id="storeLive" value="Live GPS / live video feed"><span>Live GPS / live video feed</span></label>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Cloud retention desired">
+          <label class="label" for="retention">If cloud: how long should footage stay available?</label>
+          <select id="retention">
+            <option value="">Select one</option>
+            <option>7 days</option>
+            <option>14 days</option>
+            <option>30 days</option>
+            <option>90 days</option>
+            <option>Not using cloud</option>
+            <option>Other (note below)</option>
+          </select>
+        </div>
+        <div class="field" data-label="Retention, other">
+          <label class="label" for="retentionOther">Other retention note</label>
+          <input type="text" id="retentionOther" placeholder="Only if 'Other' above">
+        </div>
+      </div>
+      <div class="field" data-label="Who needs live/remote access">
+        <span class="label">Who needs to view live footage or pull up clips?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="checkbox" id="accessDispatch" value="Dispatch office"><span>Dispatch office</span></label>
+          <label class="chip"><input type="checkbox" id="accessOwner" value="Owner / management"><span>Owner / management</span></label>
+          <label class="chip"><input type="checkbox" id="accessInsurance" value="Insurance carrier"><span>Insurance carrier</span></label>
+          <label class="chip"><input type="checkbox" id="accessDrivers" value="Drivers (self-view)"><span>Drivers (self-view)</span></label>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Cellular reliability">
+          <span class="label">Is cell signal reliable across your routes?</span>
+          <div class="choice-grid">
+            <label class="chip"><input type="radio" name="cellSignal" id="cellYes" value="Yes"><span>Yes</span></label>
+            <label class="chip"><input type="radio" name="cellSignal" id="cellNo" value="No, dead zones"><span>No, dead zones</span></label>
+            <label class="chip"><input type="radio" name="cellSignal" id="cellUnsure" value="Unsure"><span>Unsure</span></label>
+          </div>
+        </div>
+        <div class="field" data-label="Data plan sourcing">
+          <span class="label">Cellular data plan / SIM</span>
+          <div class="choice-grid">
+            <label class="chip"><input type="radio" name="dataPlan" id="dataOwn" value="We'll provide our own plan"><span>We'll provide our own</span></label>
+            <label class="chip"><input type="radio" name="dataPlan" id="dataSource" value="Needs to be sourced"><span>Needs to be sourced</span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket" id="s5">
+      <div class="ticket-head"><span class="ticket-num">05</span><h2>Bodies &amp; mounting</h2></div>
+      <p class="ticket-sub">Towing rigs have moving parts and exposed frame rails — this is what actually drives install time per truck.</p>
+
+      <div class="field" data-label="Body types in fleet">
+        <span class="label">Body types in the fleet <span class="opt">(choose all that apply)</span></span>
+        <div class="choice-grid">
+          <label class="chip"><input type="checkbox" id="bodyWheelLift" value="Wheel-lift"><span>Wheel-lift</span></label>
+          <label class="chip"><input type="checkbox" id="bodyFlatbed" value="Flatbed rollback"><span>Flatbed rollback</span></label>
+          <label class="chip"><input type="checkbox" id="bodyBoom" value="Integrated / boom wrecker"><span>Integrated / boom wrecker</span></label>
+          <label class="chip"><input type="checkbox" id="bodyLight" value="Light-duty tow"><span>Light-duty tow</span></label>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Waterproof/vandal-resistant housings needed">
+          <span class="label">Need waterproof / vandal-resistant exterior housings?</span>
+          <div class="choice-grid">
+            <label class="chip"><input type="radio" name="ruggedHousing" id="ruggedYes" value="Yes"><span>Yes</span></label>
+            <label class="chip"><input type="radio" name="ruggedHousing" id="ruggedNo" value="No"><span>No</span></label>
+          </div>
+        </div>
+        <div class="field" data-label="Open frame rail routing">
+          <span class="label">Exposed frame rails / long cable runs expected?</span>
+          <div class="choice-grid">
+            <label class="chip"><input type="radio" name="frameRail" id="railYes" value="Yes"><span>Yes</span></label>
+            <label class="chip"><input type="radio" name="frameRail" id="railNo" value="No"><span>No</span></label>
+            <label class="chip"><input type="radio" name="frameRail" id="railUnsure" value="Unsure"><span>Unsure</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="field" data-label="Mounting / routing constraints">
+        <label class="label" for="mountingNotes">Mounting or routing constraints we should know about</label>
+        <textarea id="mountingNotes" placeholder="e.g., light bars already mounted on the roofline, beacon wiring to avoid, deck winch controls"></textarea>
+      </div>
+    </section>
+
+    <section class="ticket" id="s6">
+      <div class="ticket-head"><span class="ticket-num">06</span><h2>Power &amp; recording</h2></div>
+      <p class="ticket-sub">24/7 recording changes the electrical plan — and nobody wants a fleet of dead batteries Monday morning.</p>
+
+      <div class="field" data-label="Recording mode">
+        <span class="label">When should cameras record?</span>
+        <div class="stack-radio">
+          <label class="chip"><input type="radio" name="recordMode" id="recordIgnition" value="Ignition-on only"><span>Ignition-on only</span></label>
+          <label class="chip"><input type="radio" name="recordMode" id="record247" value="24/7 parking-guard mode"><span>24/7 parking-guard mode</span></label>
+          <label class="chip"><input type="radio" name="recordMode" id="recordMix" value="Mix, depending on vehicle"><span>Mix, depending on vehicle</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="OK with auxiliary battery / cutoff">
+        <span class="label">OK adding an auxiliary battery pack or low-voltage cutoff to protect starting batteries?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="auxBattery" id="auxYes" value="Yes"><span>Yes</span></label>
+          <label class="chip"><input type="radio" name="auxBattery" id="auxNo" value="No"><span>No</span></label>
+          <label class="chip"><input type="radio" name="auxBattery" id="auxRec" value="Need a recommendation"><span>Need a recommendation</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="Preferred electrical connection">
+        <span class="label">Preferred way to power the cameras</span>
+        <div class="stack-radio">
+          <label class="chip"><input type="radio" name="wiring" id="wireFuse" value="Hardwire to fuse box"><span>Hardwire to fuse box</span></label>
+          <label class="chip"><input type="radio" name="wiring" id="wireDeutsch" value="Heavy-duty / Deutsch connectors"><span>Heavy-duty / Deutsch connectors</span></label>
+          <label class="chip"><input type="radio" name="wiring" id="wireObd" value="OBD-II / J1939 tap"><span>OBD-II / J1939 tap</span></label>
+          <label class="chip"><input type="radio" name="wiring" id="wireRec" value="No preference — recommend best fit"><span>No preference — recommend</span></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket" id="s7">
+      <div class="ticket-head"><span class="ticket-num">07</span><h2>Telematics &amp; safety</h2></div>
+      <p class="ticket-sub">Existing GPS/ELD hardware changes install time, and in-cab audio has real legal limits depending on the state.</p>
+
+      <div class="row2">
+        <div class="field" data-label="Existing ELD/GPS/telematics platform">
+          <span class="label">Already running an ELD / GPS / telematics platform?</span>
+          <div class="choice-grid">
+            <label class="chip"><input type="radio" name="telematics" id="telYes" value="Yes"><span>Yes</span></label>
+            <label class="chip"><input type="radio" name="telematics" id="telNo" value="No"><span>No</span></label>
+          </div>
+        </div>
+        <div class="field" data-label="Platform name, if yes">
+          <label class="label" for="telematicsName">Which one?</label>
+          <input type="text" id="telematicsName" placeholder="e.g., Samsara, Motive, Geotab">
+        </div>
+      </div>
+      <div class="field" data-label="Integrate new cameras with that platform">
+        <span class="label">Want the new cameras to integrate with that platform?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="telIntegrate" id="telIntYes" value="Yes"><span>Yes</span></label>
+          <label class="chip"><input type="radio" name="telIntegrate" id="telIntNo" value="No"><span>No</span></label>
+          <label class="chip"><input type="radio" name="telIntegrate" id="telIntUnsure" value="Unsure"><span>Unsure</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="In-cab audio recording">
+        <span class="label">Want in-cab audio recording?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="audio" id="audioYes" value="Yes"><span>Yes</span></label>
+          <label class="chip"><input type="radio" name="audio" id="audioNo" value="No"><span>No</span></label>
+        </div>
+        <p class="hint">Some states require all-party consent to record in-cab audio — worth flagging to your attorney if you're saying yes here.</p>
+      </div>
+      <div class="field" data-label="Panic / emergency button">
+        <span class="label">Need a panic / emergency event button?</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="panicButton" id="panicYes" value="Yes"><span>Yes</span></label>
+          <label class="chip"><input type="radio" name="panicButton" id="panicNo" value="No"><span>No</span></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket" id="s8">
+      <div class="ticket-head"><span class="ticket-num">08</span><h2>Hardware &amp; testing</h2></div>
+      <p class="ticket-sub">Who's buying the gear, and whether we prove it out on one truck before committing to all thirty-plus.</p>
+
+      <div class="field" data-label="Hardware sourcing">
+        <span class="label">Who's supplying the camera hardware?</span>
+        <div class="stack-radio">
+          <label class="chip"><input type="radio" name="sourcing" id="sourceUs" value="You supply and install everything"><span>You supply and install everything</span></label>
+          <label class="chip"><input type="radio" name="sourcing" id="sourceOwn" value="We already purchased hardware — install only"><span>We already purchased hardware — install only</span></label>
+          <label class="chip"><input type="radio" name="sourcing" id="sourceMix" value="Mix — some purchased, some to source"><span>Mix — some purchased, some to source</span></label>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Brand/model already purchased">
+          <label class="label" for="ownHardware">If already purchased: brand / model</label>
+          <input type="text" id="ownHardware" placeholder="e.g., 4x Lorex MC219 kits in the office">
+        </div>
+        <div class="field" data-label="Preferred brand/system">
+          <label class="label" for="preferredBrand">Preferred camera brand or system, if any</label>
+          <input type="text" id="preferredBrand" placeholder="No preference is fine">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" data-label="Pilot truck before full rollout">
+          <span class="label">Run one pilot-truck install before the rest?</span>
+          <div class="choice-grid">
+            <label class="chip"><input type="radio" name="pilot" id="pilotYes" value="Yes"><span>Yes</span></label>
+            <label class="chip"><input type="radio" name="pilot" id="pilotNo" value="No"><span>No</span></label>
+          </div>
+        </div>
+        <div class="field" data-label="Warranty expectations">
+          <label class="label" for="warranty">Installation warranty expectations</label>
+          <input type="text" id="warranty" placeholder="e.g., 1 year on wiring and mounting">
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket" id="s9">
+      <div class="ticket-head"><span class="ticket-num">09</span><h2>Budget &amp; compliance</h2></div>
+      <p class="ticket-sub">The business reasons behind the project, and who actually signs the check.</p>
+
+      <div class="row2">
+        <div class="field" data-label="Budget guidance">
+          <label class="label" for="budget">Budget guidance — total or per vehicle</label>
+          <input type="text" id="budget" placeholder="e.g., ~$450/truck, or $15k total">
+        </div>
+        <div class="field" data-label="Who signs off">
+          <label class="label" for="signoff">Who signs off on the bid?</label>
+          <input type="text" id="signoff" placeholder="Name / title">
+        </div>
+      </div>
+      <div class="field" data-label="Primary driver for this project">
+        <span class="label">What's driving this project? <span class="opt">(choose all that apply)</span></span>
+        <div class="choice-grid">
+          <label class="chip"><input type="checkbox" id="driverInsurance" value="Insurance premium discount"><span>Insurance premium discount</span></label>
+          <label class="chip"><input type="checkbox" id="driverLiability" value="Liability / accident evidence"><span>Liability / accident evidence</span></label>
+          <label class="chip"><input type="checkbox" id="driverSafety" value="Driver coaching &amp; safety"><span>Driver coaching &amp; safety</span></label>
+          <label class="chip"><input type="checkbox" id="driverDot" value="DOT / regulatory compliance"><span>DOT / regulatory compliance</span></label>
+          <label class="chip"><input type="checkbox" id="driverVendor" value="Previous installer dropped the job"><span>Previous installer dropped the job</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="Preferred install site">
+        <span class="label">Preferred install location</span>
+        <div class="choice-grid">
+          <label class="chip"><input type="radio" name="installSite" id="siteShop" value="Your shop"><span>Your shop</span></label>
+          <label class="chip"><input type="radio" name="installSite" id="siteYard" value="Our yard / lot"><span>Our yard / lot</span></label>
+          <label class="chip"><input type="radio" name="installSite" id="siteEither" value="Either works"><span>Either works</span></label>
+        </div>
+      </div>
+      <div class="field" data-label="Known compliance concerns">
+        <label class="label" for="complianceNotes">Any known state recording-consent or compliance concerns?</label>
+        <textarea id="complianceNotes" placeholder="e.g., operate across state lines, union driver agreements, etc."></textarea>
+      </div>
+      <div class="field" data-label="Anything else">
+        <label class="label" for="otherNotes">Anything else we should know before quoting?</label>
+        <textarea id="otherNotes"></textarea>
+      </div>
+    </section>
+
+  </div>
+</form>
+
+<p class="footnote" id="footerNote">Nothing here leaves your browser except what you choose to download or email. Use the bar below to send this fleet profile back to your installer.</p>
+
+<div class="action-bar">
+  <div class="action-bar-inner">
+    <div class="action-buttons">
+      <button type="button" class="btn primary" id="btnDownload">Download summary (.txt)</button>
+      <button type="button" class="btn" id="btnEmail">Email summary</button>
+      <button type="button" class="btn ghost" id="btnPrint">Print / save PDF</button>
+      <button type="button" class="btn ghost" id="btnClear">Clear draft</button>
+    </div>
+    <span class="saved-note" id="savedNote">Draft not saved yet</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Edit these two lines with your business info — they're used for the mailto
+  // address and the footer note. Leave recipientEmail blank to let the
+  // respondent choose who to send it to themselves.
+  var CONFIG = { businessName: "Reliable Technology Solutions", recipientEmail: "cholettr@gmail.com" };
+
+  var form = document.getElementById('intakeForm');
+  var DRAFT_KEY = 'fleetcam_intake_draft_v1';
+
+  // default today's date
+  var dateField = document.getElementById('formDate');
+  if (dateField && !dateField.value) {
+    dateField.value = new Date().toISOString().slice(0,10);
+  }
+
+  if (CONFIG.businessName) {
+    document.getElementById('footerNote').textContent =
+      'Nothing here leaves your browser except what you choose to download or email. Use the bar below to send this fleet profile to ' + CONFIG.businessName + '.';
+  }
+
+  function allControls(){
+    return form.querySelectorAll('input[id], select[id], textarea[id]');
+  }
+
+  function saveDraft(){
+    var data = {};
+    allControls().forEach(function(el){
+      if (el.type === 'checkbox' || el.type === 'radio') data[el.id] = el.checked;
+      else data[el.id] = el.value;
+    });
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+      var now = new Date();
+      document.getElementById('savedNote').textContent =
+        'Draft saved locally at ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    } catch (e) { /* storage unavailable — ignore */ }
+    updateProgress();
+  }
+
+  function loadDraft(){
+    var raw;
+    try { raw = localStorage.getItem(DRAFT_KEY); } catch (e) { return; }
+    if (!raw) return;
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { return; }
+    Object.keys(data).forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!data[id];
+      else el.value = data[id];
+    });
+    document.getElementById('savedNote').textContent = 'Draft restored from this browser';
+  }
+
+  var debounceTimer;
+  form.addEventListener('input', function(){
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(saveDraft, 400);
+  });
+
+  var REQUIRED_IDS = ['reqName','reqCompany','reqEmail','reqTotalVehicles'];
+  function updateProgress(){
+    var filledReq = REQUIRED_IDS.filter(function(id){
+      var el = document.getElementById(id);
+      return el && el.value.trim().length > 0;
+    }).length;
+    document.getElementById('pillReq').textContent = filledReq + '/' + REQUIRED_IDS.length;
+
+    var all = Array.prototype.slice.call(allControls());
+    var total = 0, filled = 0;
+    var seen = {};
+    all.forEach(function(el){
+      var key = el.name || el.id;
+      if (el.type === 'radio') {
+        if (seen[key]) return;
+        seen[key] = true;
+        total++;
+        if (form.querySelector('input[name="' + el.name + '"]:checked')) filled++;
+        return;
+      }
+      total++;
+      if (el.type === 'checkbox') { if (el.checked) filled++; }
+      else if (el.value.trim().length > 0) filled++;
+    });
+    var pct = total ? Math.round((filled/total)*100) : 0;
+    document.getElementById('pillPct').textContent = pct + '%';
+    document.getElementById('navBar').style.width = pct + '%';
+  }
+
+  function fieldValue(field){
+    var checks = field.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
+    if (checks.length) {
+      return Array.prototype.map.call(checks, function(c){
+        var lbl = c.closest('label');
+        return lbl ? lbl.textContent.trim() : c.value;
+      }).join(', ');
+    }
+    var sel = field.querySelector('select');
+    if (sel) return sel.value ? sel.options[sel.selectedIndex].textContent.trim() : '';
+    var ta = field.querySelector('textarea');
+    if (ta) return ta.value.trim();
+    var inp = field.querySelector('input');
+    if (inp) return inp.value.trim();
+    return '';
+  }
+
+  function collectSummary(){
+    var lines = ['FLEET CAMERA INSTALL — BID INTAKE', 'Generated ' + new Date().toLocaleString(), ''];
+    form.querySelectorAll('.ticket').forEach(function(sec){
+      var num = sec.querySelector('.ticket-num').textContent.trim();
+      var title = sec.querySelector('h2').textContent.trim();
+      var any = false;
+      var secLines = [];
+      sec.querySelectorAll('.field').forEach(function(f){
+        var label = f.getAttribute('data-label');
+        var val = fieldValue(f);
+        if (val) { secLines.push(label + ': ' + val); any = true; }
+      });
+      if (any) {
+        lines.push(num + '  ' + title.toUpperCase());
+        lines.push('-'.repeat((num + '  ' + title).length));
+        lines = lines.concat(secLines);
+        lines.push('');
+      }
+    });
+    return lines.join('\n');
+  }
+
+  document.getElementById('btnDownload').addEventListener('click', function(){
+    var text = collectSummary();
+    var blob = new Blob([text], {type:'text/plain'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var company = document.getElementById('reqCompany').value.trim().replace(/[^a-z0-9]+/gi,'-').toLowerCase() || 'fleet';
+    a.href = url;
+    a.download = 'camera-intake-' + company + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    saveDraft();
+  });
+
+  document.getElementById('btnEmail').addEventListener('click', function(){
+    var company = document.getElementById('reqCompany').value.trim() || 'fleet';
+    var subject = 'Camera install intake — ' + company;
+    var text = collectSummary();
+    var limited = text.length > 1500
+      ? text.slice(0, 1500) + '\n\n[Truncated for email — please also attach the downloaded .txt summary.]'
+      : text;
+    var mailto = 'mailto:' + encodeURIComponent(CONFIG.recipientEmail || '') +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(limited);
+    window.location.href = mailto;
+    saveDraft();
+  });
+
+  document.getElementById('btnPrint').addEventListener('click', function(){
+    window.print();
+  });
+
+  document.getElementById('btnClear').addEventListener('click', function(){
+    if (!window.confirm('Clear everything you\'ve entered on this form? This cannot be undone.')) return;
+    try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+    allControls().forEach(function(el){
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+      else el.value = '';
+    });
+    if (dateField) dateField.value = new Date().toISOString().slice(0,10);
+    document.getElementById('savedNote').textContent = 'Draft cleared';
+    updateProgress();
+  });
+
+  // scrollspy
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#ticketNav a'));
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.ticket'));
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          navLinks.forEach(function(l){ l.classList.remove('active'); });
+          var active = navLinks.find(function(l){ return l.dataset.target === entry.target.id; });
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function(s){ obs.observe(s); });
+  }
+
+  loadDraft();
+  updateProgress();
+})();
+</script>
+
+</body></html>
